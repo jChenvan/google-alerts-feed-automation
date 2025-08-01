@@ -5,6 +5,8 @@ cachetools==5.5.2
 certifi==2025.7.14
 charset-normalizer==3.4.2
 colorama==0.4.6
+dnspython==2.7.0
+email_validator==2.2.0
 feedparser==6.0.11
 google-ai-generativelanguage==0.6.15
 google-api-core==2.25.1
