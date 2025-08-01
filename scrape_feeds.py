@@ -2,12 +2,12 @@ import asyncio
 from typing import Type
 from fetch_site import fetch_site
 from get_feeds import get_feeds
-from get_links_from_feed import get_links_from_feed
+from get_links_from_feed import Alert, get_links_from_feed
 from get_object_from_string import PydanticModel, get_object_from_string
 from schema import Transaction
 
 async def scrape_links(
-        links: list[tuple[str, str, str]],
+        links: list[Alert],
         schema: Type[PydanticModel],
         extra_prompts: str | None = None,
 ) -> list[tuple[str, Type[PydanticModel]]]:
@@ -29,7 +29,7 @@ async def scrape_links(
     """
     res = []
     for l in links:
-        url = l[1]
+        url = l.url
         content = await fetch_site(url)
         if not content:
             print("fetch from " + url + " failed.")

@@ -16,7 +16,7 @@ for feed in parsedFeeds:
     print("keyword: ", feed[0]) # Google Alert Keyword
     print("\n")
     for link in feed[1]:
-        print("title: ", link[0])
-        print("url: ", link[1])
-        print("summary: ", link[2])
+        print("title: ", link.title)
+        print("url: ", link.url)
+        print("summary: ", link.summary)
         print("\n")
