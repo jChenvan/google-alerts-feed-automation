@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import feedparser
 import urllib.parse
 
-def parse_google_alerts_rss(rss_url: str) -> list[tuple[str, str]]:
+def get_links_from_feed(rss_url: str) -> list[tuple[str, str, str]]:
     """
     Parses a Google Alerts RSS feed URL and extracts the title and clean URL for each alert.
 

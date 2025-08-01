@@ -1,7 +1,7 @@
 import json
 import os
 
-def getFeeds():
+def get_feeds():
     with open(os.path.join(os.path.dirname(__file__), "./feeds.json"), "r") as f:
         raw = f.read()
 

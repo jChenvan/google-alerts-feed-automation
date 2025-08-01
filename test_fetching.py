@@ -1,13 +1,12 @@
+from get_feeds import get_feeds
+from get_links_from_feed import get_links_from_feed
 
-from getFeeds import getFeeds
-from parse_google_alerts_rss import parse_google_alerts_rss
-
-feeds = getFeeds()
+feeds = get_feeds()
 
 parsedFeeds = []
 
 for feed in feeds:
-    parsed = parse_google_alerts_rss(feed[1])
+    parsed = get_links_from_feed(feed[1])
     parsedFeeds.append((
         feed[0],
         parsed,
