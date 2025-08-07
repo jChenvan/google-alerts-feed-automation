@@ -181,6 +181,7 @@ async def main():
                 all_extracted_deals.append(extracted_info)
             else:
                 print("   ❌ insufficient info")
+                print(f"   Extracted info: {extracted_info}")
         
         # Add a small delay to respect API rate limits (1 second is safe)
         time.sleep(1)
