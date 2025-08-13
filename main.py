@@ -1,12 +1,9 @@
 import asyncio
-from typing import Optional
 import google.generativeai as genai
 import json
 import os
 import time
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
-import requests
 
 from get_all_feed_contents import get_all_feed_contents
 load_dotenv()
@@ -19,24 +16,15 @@ MODEL_NAME = "gemini-2.0-flash-lite"
 
 # TODO: refine
 EXTRACTION_PROMPT = """
-From the document text provided below, extract key details about any military or arms exports. More specifically, look for the following fields:
+You are given a news article regarding video games. From the document text provided below, Look for the following fields:
 
-    transaction_type - Type of transaction (e.g., "Purchase Order", "Subcontract")
-    company_division - Company or division name
-    recipient - Recipient of the transaction
-    amount - Transaction amount (defaults to 0)
-    description - Transaction description
-    address_1, address_2, city, province, region, postal_code - Address fields
-    source_date - Date in YYYY-MM-DD format
-    source_description - Source description
-    grant_type - Type of grant
-    commodity_class - Commodity classification
-    contract_number - Contract number
-    comments - Additional comments
-    is_primary - Boolean flag (defaults to false)
+game - name of the video game being discussed
+date - date of the news
+game_description - a one sentence description of the game
+news_description - describe the news as concisely as possible. Use telegraphic style.
 
-
-Do not hallucinate. If a field cannot be detemined from the text, leave it empty.
+Make sure to put the correct information in the correct field.
+Do not hallucinate. If a field cannot be detemined from the text or isn't relevant, leave it empty.
 
 ---
 DOCUMENT TEXT:
@@ -46,81 +34,26 @@ DOCUMENT TEXT:
 SCHEMA = {
   "type": "object",
   "properties": {
-    "transaction_type": {
+    "game": {
       "type": "string",
-      "description": "Type of transaction (e.g., 'Purchase Order', 'Subcontract')"
+      "description": "Name of the video game"
     },
-    "company_division": {
+    "game_description": {
       "type": "string",
-      "description": "Company or division name"
+      "description": "a one sentence description of the game"
     },
-    "recipient": {
-      "type": "string",
-      "description": "Recipient of the transaction"
-    },
-    "amount": {
-      "type": "number",
-      "description": "Transaction amount",
-    },
-    "description": {
-      "type": "string",
-      "description": "Transaction description"
-    },
-    "address_1": {
-      "type": "string",
-      "description": "Address line 1"
-    },
-    "address_2": {
-      "type": "string",
-      "description": "Address line 2"
-    },
-    "city": {
-      "type": "string",
-      "description": "City"
-    },
-    "province": {
-      "type": "string",
-      "description": "Province/State"
-    },
-    "region": {
-      "type": "string",
-      "description": "Region"
-    },
-    "postal_code": {
-      "type": "string",
-      "description": "Postal code"
-    },
-    "source_date": {
+    "date": {
       "type": "string",
       "format": "date-time",
-      "description": "Date in YYYY-MM-DD format"
+      "description": "Date of the news"
     },
-    "source_description": {
+    "news_description": {
       "type": "string",
-      "description": "Source description"
-    },
-    "grant_type": {
-      "type": "string",
-      "description": "Type of grant"
-    },
-    "commodity_class": {
-      "type": "string",
-      "description": "Commodity classification"
-    },
-    "contract_number": {
-      "type": "string",
-      "description": "Contract number"
-    },
-    "comments": {
-      "type": "string",
-      "description": "Additional comments"
-    },
-    "is_primary": {
-      "type": "boolean",
-      "description": "Boolean flag indicating if it's primary",
+      "description": "Concise, telegraphic description of the news"
     }
   }
 }
+
 
 def process_content_with_gemini(text_content):
     """
@@ -176,19 +109,17 @@ async def main():
         
         # Check if the extraction was successful and contains actual data
         if extracted_info and "error" not in extracted_info:
-            if ("transaction_type" in extracted_info) and  ("company_division" in extracted_info) and ("recipient" in extracted_info):
-                print("   ✔️ Found relevant info")
-                all_extracted_deals.append(extracted_info)
-            else:
-                print("   ❌ insufficient info")
-                print(f"   Extracted info: {extracted_info}")
+            print("   ✔️ Found relevant info")
+            all_extracted_deals.append(extracted_info)
+            print(f"   Extracted info: {extracted_info}")
         
         # Add a small delay to respect API rate limits (1 second is safe)
         time.sleep(1)
 
     if all_extracted_deals:
-        for transaction in all_extracted_deals:
-            requests.post("https://ploughshares.nixc.us/api/transaction", json=transaction)
+        with open("./result.json", "w", encoding="utf-8") as f:
+            json.dump(all_extracted_deals, f, ensure_ascii=False, indent=2)
+        print(f"\n✅ Extracted info written to ./result.json")
     else:
         print("\nNo relevant deals were extracted from any of the pages.")
 
